@@ -1,0 +1,6 @@
+".\exp_5_main.obj",
+".\LED_Control.obj",
+".\switch.obj",
+".\sEOS.obj" 
+TO "exp5_prj" 
+RAMSIZE(256) 

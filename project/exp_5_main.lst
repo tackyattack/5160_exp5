@@ -1,0 +1,46 @@
+C51 COMPILER V6.02  EXP_5_MAIN                                                             11/23/2019 20:00:23 PAGE 1   
+
+
+C51 COMPILER V6.02, COMPILATION OF MODULE EXP_5_MAIN
+OBJECT MODULE PLACED IN .\exp_5_main.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\source\exp_5_main.c DEBUG OBJECTEXTEND PRINT(.\exp_5_main.lst) OBJECT(.\
+                    -exp_5_main.obj) 
+
+stmt level    source
+
+   1          #include <stdio.h>
+   2          #include "main.h"
+   3          #include "PORT.H"
+   4          #include "sEOS.h"
+   5          
+   6          
+   7          
+   8          main()
+   9          {
+  10   1         AUXR=0x0c;   // make all of XRAM available, ALE always on
+  11   1         if(OSC_PER_INST==6)
+  12   1         {
+  13   2             CKCON0=0x01;  // set X2 clock mode
+  14   2         }
+  15   1         else if(OSC_PER_INST==12)
+  16   1         {
+  17   2             CKCON0=0x00;  // set standard clock mode
+  18   2         }
+  19   1      
+  20   1         sEOS_init(MS_PER_TICK);
+  21   1         while(1);
+  22   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     13    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,220 @@
+C51 COMPILER V6.02  SEOS                                                                   11/23/2019 20:00:24 PAGE 1   
+
+
+C51 COMPILER V6.02, COMPILATION OF MODULE SEOS
+OBJECT MODULE PLACED IN .\sEOS.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\source\sEOS.c DEBUG OBJECTEXTEND PRINT(.\sEOS.lst) OBJECT(.\sEOS.obj) 
+
+stmt level    source
+
+   1          #include "main.h"
+   2          #include "PORT.H"
+   3          #include "switch.h"
+   4          #include "LED_Control.h"
+   5          
+   6          uint8_t delay_amount = 1;
+   7          uint8_t LED_display = 0;
+   8          uint16_t display_tick = 0;
+   9          
+  10          typedef enum {delay_mode, delay_increment, delay_decrement, flash_mode, LR_flash_mode, RL_flash_mode} os_s
+             -tate_t;
+  11          os_state_t os_state;
+  12          SW_values_t SW1_val;
+  13          SW_values_t SW2_val;
+  14          SW_values_t SW3_val;
+  15          SW_values_t SW4_val;
+  16          
+  17          void sEOS_ISR(void) interrupt Timer_2_Overflow
+  18          {
+  19   1        TF2 = 0;
+  20   1      
+  21   1        read_switch(&SW1_val);
+  22   1        read_switch(&SW2_val);
+  23   1        read_switch(&SW3_val);
+  24   1        read_switch(&SW4_val);
+  25   1      
+  26   1        switch(os_state)
+  27   1        {
+  28   2          case delay_mode:
+  29   2            LED_number(delay_amount);
+  30   2            if (SW2_val.SW_state == pressed)
+  31   2            {
+  32   3              os_state = delay_increment;
+  33   3              SW2_val.SW_state = held;
+  34   3            }
+  35   2            if (SW3_val.SW_state == pressed)
+  36   2            {
+  37   3              os_state = delay_decrement;
+  38   3              SW3_val.SW_state = held;
+  39   3            }
+  40   2      
+  41   2            if (SW1_val.SW_state == pressed)
+  42   2            {
+  43   3              os_state = LR_flash_mode;
+  44   3              SW1_val.SW_state = held;
+  45   3              LED_display = 0;
+  46   3            }
+  47   2            if (SW4_val.SW_state == pressed)
+  48   2            {
+  49   3              os_state = RL_flash_mode;
+  50   3              SW4_val.SW_state = held;
+  51   3              LED_display = 0;
+  52   3            }
+  53   2            break;
+  54   2          case delay_increment:
+C51 COMPILER V6.02  SEOS                                                                   11/23/2019 20:00:24 PAGE 2   
+
+  55   2            if(delay_amount < MAX_DELAY) delay_amount++;
+  56   2            LED_number(delay_amount);
+  57   2            os_state = delay_mode;
+  58   2            break;
+  59   2          case delay_decrement:
+  60   2            if(delay_amount > 1) delay_amount--;
+  61   2            LED_number(delay_amount);
+  62   2            os_state = delay_mode;
+  63   2            break;
+  64   2          case flash_mode:
+  65   2            LED_number(LED_display);
+  66   2            LED_display=0;
+  67   2      
+  68   2            if (SW2_val.SW_state == pressed)
+  69   2            {
+  70   3              SW2_val.SW_state = held;
+  71   3              os_state = delay_mode;
+  72   3            }
+  73   2            if (SW3_val.SW_state == pressed)
+  74   2            {
+  75   3              SW3_val.SW_state = held;
+  76   3              os_state = delay_mode;
+  77   3            }
+  78   2            if (SW1_val.SW_state == pressed)
+  79   2            {
+  80   3              os_state = LR_flash_mode;
+  81   3              SW1_val.SW_state = held;
+  82   3            }
+  83   2            if (SW4_val.SW_state == pressed)
+  84   2            {
+  85   3              os_state = RL_flash_mode;
+  86   3              SW4_val.SW_state = held;
+  87   3            }
+  88   2            break;
+  89   2          case LR_flash_mode:
+  90   2            LED_number(LED_display);
+  91   2            display_tick++;
+  92   2            if(display_tick > delay_amount*DELAY_SETTING_TICK)
+  93   2            {
+  94   3              display_tick = 0;
+  95   3              if(LED_display >= 0x0f)
+  96   3              {
+  97   4                LED_display = 0;
+  98   4              }
+  99   3              else
+ 100   3              {
+ 101   4                LED_display = LED_display>>1;
+ 102   4                LED_display = LED_display | (0x08);
+ 103   4              }
+ 104   3            }
+ 105   2      
+ 106   2            if (SW2_val.SW_state == pressed)
+ 107   2            {
+ 108   3              SW2_val.SW_state = held;
+ 109   3              os_state = delay_mode;
+ 110   3            }
+ 111   2            if (SW3_val.SW_state == pressed)
+ 112   2            {
+ 113   3              SW3_val.SW_state = held;
+ 114   3              os_state = delay_mode;
+ 115   3            }
+ 116   2            if (SW1_val.SW_state == pressed)
+C51 COMPILER V6.02  SEOS                                                                   11/23/2019 20:00:24 PAGE 3   
+
+ 117   2            {
+ 118   3              os_state = flash_mode;
+ 119   3              SW1_val.SW_state = held;
+ 120   3            }
+ 121   2            if (SW4_val.SW_state == pressed)
+ 122   2            {
+ 123   3              os_state = RL_flash_mode;
+ 124   3              SW4_val.SW_state = held;
+ 125   3              LED_display = 0;
+ 126   3            }
+ 127   2            break;
+ 128   2          case RL_flash_mode:
+ 129   2            LED_number(LED_display);
+ 130   2            display_tick++;
+ 131   2            if(display_tick > delay_amount*DELAY_SETTING_TICK)
+ 132   2            {
+ 133   3              display_tick = 0;
+ 134   3              if(LED_display >= 0x0f)
+ 135   3              {
+ 136   4                LED_display = 0;
+ 137   4              }
+ 138   3              else
+ 139   3              {
+ 140   4                LED_display = LED_display<<1;
+ 141   4                LED_display = LED_display | (0x01);
+ 142   4              }
+ 143   3            }
+ 144   2      
+ 145   2            if (SW2_val.SW_state == pressed)
+ 146   2            {
+ 147   3              SW2_val.SW_state = held;
+ 148   3              os_state = delay_mode;
+ 149   3            }
+ 150   2            if (SW3_val.SW_state == pressed)
+ 151   2            {
+ 152   3              SW3_val.SW_state = held;
+ 153   3              os_state = delay_mode;
+ 154   3            }
+ 155   2            if (SW1_val.SW_state == pressed)
+ 156   2            {
+ 157   3              os_state = LR_flash_mode;
+ 158   3              SW1_val.SW_state = held;
+ 159   3              LED_display = 0;
+ 160   3            }
+ 161   2            if (SW4_val.SW_state == pressed)
+ 162   2            {
+ 163   3              os_state = flash_mode;
+ 164   3              SW4_val.SW_state = held;
+ 165   3            }
+ 166   2            break;
+ 167   2        }
+ 168   1      }
+ 169          
+ 170          
+ 171          
+ 172          void sEOS_init(uint8_t interval_ms)
+ 173          {
+ 174   1        uint16_t preload = (uint16_t)(65536 - ((OSC_FREQ*interval_ms)/(OSC_PER_INST*1000UL)));
+ 175   1        switch_init(&SW1_val, 1<<0);
+ 176   1        switch_init(&SW2_val, 1<<1);
+ 177   1        switch_init(&SW3_val, 1<<2);
+ 178   1        switch_init(&SW4_val, 1<<3);
+C51 COMPILER V6.02  SEOS                                                                   11/23/2019 20:00:24 PAGE 4   
+
+ 179   1        os_state = flash_mode;
+ 180   1        LED_display = 0;
+ 181   1        delay_amount = 1;
+ 182   1      
+ 183   1        T2CON=0;
+ 184   1        RCAP2H=(uint8_t)preload/256;
+ 185   1        RCAP2L=(uint8_t)preload%256;
+ 186   1        TF2=0;
+ 187   1        ET2=1;
+ 188   1        EA=1;
+ 189   1        TR2=1;
+ 190   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    601    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     17       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
