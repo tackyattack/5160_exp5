@@ -2,6 +2,7 @@
 #include "PORT.H"
 #include "switch.h"
 #include "LED_Control.h"
+#include "sEOS.h"
 
 uint8_t delay_amount = 1;
 uint8_t LED_display = 0;
